@@ -31,11 +31,11 @@ namespace FtpExplorerApp
             fileNameTextBlock.Text = file.FileName;
             if (file.FileType == FileType.Directory)
             {
-                fileImage.Source = BitmapFrame.Create(new Uri(Directory.GetCurrentDirectory() + "directory.png"));
+                fileImage.Source = BitmapFrame.Create(new Uri(Directory.GetCurrentDirectory() + @"\folder.png"));
             }
             else
             {
-                fileImage.Source = BitmapFrame.Create(new Uri(Directory.GetCurrentDirectory() + "file.png"));
+                fileImage.Source = BitmapFrame.Create(new Uri(Directory.GetCurrentDirectory() + @"\file.png"));
             }
         }
     }

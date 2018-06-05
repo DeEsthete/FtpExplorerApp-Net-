@@ -29,6 +29,7 @@ namespace FtpExplorerApp
         private string address;
         private string user;
         private string password;
+        private string currentAddress;
 
         public MainPage(Window window, FtpWebRequest ftpWebRequest, string address, string user, string password)
         {
@@ -38,48 +39,65 @@ namespace FtpExplorerApp
             this.address = address;
             this.user = user;
             this.password = password;
+            currentAddress = address;
             GetListDirecotry(ftpWebRequest);
         }
 
-        private void ExplorerListBoxMouseDoubleClick(object sender, MouseButtonEventArgs e)
+        private async void ExplorerListBoxMouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             FileEntityUserControll fileUserControll = (FileEntityUserControll)explorerListBox.SelectedItem;
             FileEntity file = fileUserControll.file;
-            FtpWebRequest tempWebRequest = (FtpWebRequest)WebRequest.Create(address + @"\" + file.FileName);
 
             if (file.FileType == FileType.Directory)
             {
+                FtpWebRequest tempWebRequest = (FtpWebRequest)WebRequest.Create(address + @"\" + file.FileName);
                 tempWebRequest.Method = WebRequestMethods.Ftp.ListDirectory;
                 tempWebRequest.Credentials = new NetworkCredential(user, password);
                 GetListDirecotry(tempWebRequest);
+                currentAddress = address + @"\" + file.FileName;
             }
             else
             {
-                tempWebRequest.Method = WebRequestMethods.Ftp.DownloadFile;
-                tempWebRequest.Credentials = new NetworkCredential(user, password);
-
-                FtpWebResponse webResponse = (FtpWebResponse)tempWebRequest.GetResponse();
-                using (var stream = webResponse.GetResponseStream())
+                SaveFileDialog fileDialog = new SaveFileDialog();
+                if (fileDialog.ShowDialog() == true)
                 {
-                    byte[] buffer = new byte[10 * 1024 * 1024];
-                    int bytes = stream.Read(buffer, 0, buffer.Length);
-
-                    Directory.CreateDirectory(Directory.GetCurrentDirectory() + @"\files");
-                    File.WriteAllBytes(Directory.GetCurrentDirectory() + @"\files"+ @"\" + file.FileName, buffer);
+                    string path = fileDialog.FileName;
+                    await DownloadFile(path, file.FileName);
                 }
             }
         }
 
+        private Task DownloadFile(string path,string fileName)
+        {
+            return Task.Run(() =>
+            {
+                FtpWebRequest webRequest = (FtpWebRequest)WebRequest.Create(address + "/.txt");//имя файла
+                webRequest.Method = WebRequestMethods.Ftp.DownloadFile;
+                webRequest.Credentials = new NetworkCredential(user, password);
+
+                FtpWebResponse webResponse = (FtpWebResponse)webRequest.GetResponse();
+                using (var stream = webResponse.GetResponseStream())
+                {
+
+                    byte[] buffer = new byte[10 * 1024 * 1024];
+                    int bytes = stream.Read(buffer, 0, buffer.Length);
+                    File.WriteAllBytes(path, buffer);
+                }
+            });
+        }
+
         private async void GetListDirecotry(FtpWebRequest webRequest)
         {
+            explorerListBox.Items.Clear();
+            explorerListBox.Items.Refresh();
             string direcotry = await DownloadListDirectory(webRequest);
             string[] entities = direcotry.Split(new char[] {'\n'}, StringSplitOptions.RemoveEmptyEntries);
             files = new List<FileEntity>();
             for (int i = 0; i < entities.Length; i++)
             {
                 FileEntity temp = new FileEntity();
-                string[] tmp = entities[i].Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-                //temp.FileName = 
+                var str = entities[i].Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).Last();
+                temp.FileName = str.Substring(0, str.Length - 1);
                 if (entities[i][0] == 'd')
                 {
                     temp.FileType = FileType.Directory;
@@ -88,20 +106,15 @@ namespace FtpExplorerApp
                 {
                     temp.FileType = FileType.File;
                 }
+                FileEntityUserControll tempControll = new FileEntityUserControll(temp);
+                explorerListBox.Items.Add(tempControll);
             }
-            //files нужно заполнить //распарсить entity
-
-            //for (int i = 0; i < files.Count; i++)
-            //{
-            //    FileEntityUserControll temp = new FileEntityUserControll(files[i]);
-            //    explorerListBox.Items.Add(temp);
-            //}
         }
         private Task<string> DownloadListDirectory(FtpWebRequest webRequest)
         {
             return Task.Run(() => 
             {
-                webRequest.Method = WebRequestMethods.Ftp.ListDirectory;
+                webRequest.Method = WebRequestMethods.Ftp.ListDirectoryDetails;
                 FtpWebResponse webResponse = (FtpWebResponse)webRequest.GetResponse();
 
                 using (var stream = webResponse.GetResponseStream())
@@ -120,11 +133,17 @@ namespace FtpExplorerApp
 
             if (d.ShowDialog() == true)
             {
-                //FtpWebRequest temp = (FtpWebRequest)WebRequest.Create(address);
-                //temp.Method = WebRequestMethods.Ftp.UploadFile;
-                //ftpWebRequest.Credentials = new NetworkCredential(user, password);
-                //d.FileName();
                 byte[] data = File.ReadAllBytes(d.FileName);
+
+                FtpWebRequest temp = (FtpWebRequest)WebRequest.Create(address);
+                temp.Method = WebRequestMethods.Ftp.UploadFile;
+                temp.Credentials = new NetworkCredential(user, password);
+                temp.ContentLength = data.Length;
+
+                using (var stream = temp.GetRequestStream())
+                {
+                    stream.Write(data,0,data.Length);
+                }
             }
         }
     }
