@@ -117,11 +117,14 @@ namespace FtpExplorerApp
                 webRequest.Method = WebRequestMethods.Ftp.ListDirectoryDetails;
                 FtpWebResponse webResponse = (FtpWebResponse)webRequest.GetResponse();
 
+                long byteLength;
                 using (var stream = webResponse.GetResponseStream())
                 {
+                    byteLength = webRequest.ContentLength;
                     byte[] buffer = new byte[1024];
                     int bytes = stream.Read(buffer, 0, buffer.Length);
                     string data = Encoding.Default.GetString(buffer);
+                    //data = data.Substring((int)byteLength);
                     return data;
                 }
             });
@@ -133,12 +136,16 @@ namespace FtpExplorerApp
 
             if (d.ShowDialog() == true)
             {
+                FileInfo fileInfo = new FileInfo(d.FileName);
+
+
                 byte[] data = File.ReadAllBytes(d.FileName);
 
-                FtpWebRequest temp = (FtpWebRequest)WebRequest.Create(address);
+                FtpWebRequest temp = (FtpWebRequest)WebRequest.Create(new Uri($@"{currentAddress}/{fileInfo.Name}"));
                 temp.Method = WebRequestMethods.Ftp.UploadFile;
                 temp.Credentials = new NetworkCredential(user, password);
                 temp.ContentLength = data.Length;
+                FtpWebResponse response = (FtpWebResponse)temp.GetResponse();
 
                 using (var stream = temp.GetRequestStream())
                 {

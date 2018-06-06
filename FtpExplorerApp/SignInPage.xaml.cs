@@ -51,7 +51,7 @@ namespace FtpExplorerApp
                 ftpWebRequest = (FtpWebRequest)WebRequest.Create(address);
                 ftpWebRequest.Method = WebRequestMethods.Ftp.ListDirectory;
                 ftpWebRequest.Credentials = new NetworkCredential(user, password);
-                //ftpWebRequest.UsePassive = isProtected;
+                ftpWebRequest.UsePassive = isProtected;
                 window.Content = new MainPage(window, ftpWebRequest, address, user, password);
             }
             catch (Exception e)
