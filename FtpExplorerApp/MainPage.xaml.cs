@@ -51,7 +51,7 @@ namespace FtpExplorerApp
             if (file.FileType == FileType.Directory)
             {
                 FtpWebRequest tempWebRequest = (FtpWebRequest)WebRequest.Create(address + @"\" + file.FileName);
-                tempWebRequest.Method = WebRequestMethods.Ftp.ListDirectory;
+                tempWebRequest.Method = WebRequestMethods.Ftp.ListDirectoryDetails;
                 tempWebRequest.Credentials = new NetworkCredential(user, password);
                 GetListDirecotry(tempWebRequest);
                 currentAddress = address + @"\" + file.FileName;
@@ -71,15 +71,24 @@ namespace FtpExplorerApp
         {
             return Task.Run(() =>
             {
-                FtpWebRequest webRequest = (FtpWebRequest)WebRequest.Create(address + "/.txt");//имя файла
+                FtpWebRequest webRequest = (FtpWebRequest)WebRequest.Create(currentAddress + fileName);//имя файла
                 webRequest.Method = WebRequestMethods.Ftp.DownloadFile;
                 webRequest.Credentials = new NetworkCredential(user, password);
+
+
+                FtpWebRequest ftpWebRequestByteLength = (FtpWebRequest)WebRequest.Create(currentAddress + fileName);//имя файла  //адина
+                ftpWebRequestByteLength.Method = WebRequestMethods.Ftp.GetFileSize;
+                ftpWebRequestByteLength.Credentials = new NetworkCredential(user, password);
+                long byteLength;
+                FtpWebResponse ftpFileSuzeResponse = (FtpWebResponse)ftpWebRequestByteLength.GetResponse();
+
+                byteLength = ftpFileSuzeResponse.ContentLength;
 
                 FtpWebResponse webResponse = (FtpWebResponse)webRequest.GetResponse();
                 using (var stream = webResponse.GetResponseStream())
                 {
 
-                    byte[] buffer = new byte[10 * 1024 * 1024];
+                    byte[] buffer = new byte[byteLength];
                     int bytes = stream.Read(buffer, 0, buffer.Length);
                     File.WriteAllBytes(path, buffer);
                 }
@@ -117,14 +126,11 @@ namespace FtpExplorerApp
                 webRequest.Method = WebRequestMethods.Ftp.ListDirectoryDetails;
                 FtpWebResponse webResponse = (FtpWebResponse)webRequest.GetResponse();
 
-                long byteLength;
                 using (var stream = webResponse.GetResponseStream())
                 {
-                    byteLength = webRequest.ContentLength;
-                    byte[] buffer = new byte[10 * 1024];
+                    byte[] buffer = new byte[10*1024];
                     int bytes = stream.Read(buffer, 0, buffer.Length);
                     string data = Encoding.Default.GetString(buffer);
-                    //data = data.Substring((int)byteLength);
                     return data;
                 }
             });
