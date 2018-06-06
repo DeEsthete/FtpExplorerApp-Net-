@@ -121,7 +121,7 @@ namespace FtpExplorerApp
                 using (var stream = webResponse.GetResponseStream())
                 {
                     byteLength = webRequest.ContentLength;
-                    byte[] buffer = new byte[1024];
+                    byte[] buffer = new byte[10 * 1024];
                     int bytes = stream.Read(buffer, 0, buffer.Length);
                     string data = Encoding.Default.GetString(buffer);
                     //data = data.Substring((int)byteLength);

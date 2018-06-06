@@ -39,7 +39,7 @@ namespace FtpExplorerApp
             address = "ftp://ftp.dlptest.com/";//addressTextBox.Text;
             user = "dlpuser@dlptest.com";//userTextBox.Text;
             password = "eiTqR7EMZD5zy7M";//passwordTextBox.Text;
-            isProtected = (bool)isProtectedCheckBox.Content;
+            isProtected = (bool)isProtectedCheckBox.IsChecked;
             Connect();
         }
 
