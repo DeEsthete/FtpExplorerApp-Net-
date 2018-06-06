@@ -30,15 +30,15 @@ namespace FtpExplorerApp
         public SignInPage(Window window)
         {
             InitializeComponent();
-            isProtectedCheckBox.Content = false;
+            isProtectedCheckBox.IsChecked = true;
             this.window = window;
         }
 
         private void SignInButtonClick(object sender, RoutedEventArgs e)
         {
-            address = "ftp://ftp.dlptest.com/";//addressTextBox.Text;
-            user = "dlpuser@dlptest.com";//userTextBox.Text;
-            password = "eiTqR7EMZD5zy7M";//passwordTextBox.Text;
+            address = addressTextBox.Text;//"ftp://ftp.dlptest.com/";
+            user = userTextBox.Text;//"dlpuser@dlptest.com";                //для удобства тестирования
+            password = passwordTextBox.Text;//"eiTqR7EMZD5zy7M";
             isProtected = (bool)isProtectedCheckBox.IsChecked;
             Connect();
         }
@@ -47,7 +47,6 @@ namespace FtpExplorerApp
         {
             try
             {
-                //не работает checkBox
                 ftpWebRequest = (FtpWebRequest)WebRequest.Create(address);
                 ftpWebRequest.Method = WebRequestMethods.Ftp.ListDirectory;
                 ftpWebRequest.Credentials = new NetworkCredential(user, password);

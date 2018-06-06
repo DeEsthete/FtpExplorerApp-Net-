@@ -15,7 +15,7 @@
         <TextBox x:Name="userTextBox" HorizontalAlignment="Left" Height="23" Margin="352,112,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="120"/>
         <TextBlock HorizontalAlignment="Left" Margin="297,147,0,0" TextWrapping="Wrap" Text="Password:" VerticalAlignment="Top"/>
         <TextBox x:Name="passwordTextBox" HorizontalAlignment="Left" Height="23" Margin="352,140,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="120"/>
-        <CheckBox x:Name="isProtectedCheckBox" Content="Enabless" HorizontalAlignment="Left" Margin="352,221,0,0" VerticalAlignment="Top"/>
+        <CheckBox x:Name="isProtectedCheckBox" Content="UsePassive" HorizontalAlignment="Left" Margin="352,221,0,0" VerticalAlignment="Top"/>
         <Button x:Name="signInButton" Content="Sign in" HorizontalAlignment="Left" Margin="297,324,0,0" VerticalAlignment="Top" Width="175" Click="SignInButtonClick"/>
     </Grid>
 </Page>
